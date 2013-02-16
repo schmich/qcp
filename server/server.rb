@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'json'
 require 'passgen'
-load 'version.rb'
+require 'version'
 
 class QcpServer
   def initialize(master)

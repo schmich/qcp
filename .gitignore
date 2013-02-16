@@ -18,4 +18,4 @@ tmp
 .yardoc
 _yardoc
 doc/
-Gemfile.lock
+client/Gemfile.lock
