@@ -1,4 +1,4 @@
-qcp
+## qcp
 ===
 
-Internet copy from the command-line.
+Internet clipboard from the command-line.

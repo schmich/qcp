@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'qcp'
+qcp_filename = File.join(Dir.home, '.qcp')
+exit(Qcp::App.new.run(qcp_filename, ARGV))
