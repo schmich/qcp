@@ -25,6 +25,14 @@ class QcpServer
   end
 end
 
+not_found do
+  ''
+end
+
+error do
+  ''
+end
+
 before do
   headers 'qcp-version' => "#{$version}"
   content_type :json
