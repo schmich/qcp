@@ -26,15 +26,15 @@ class QcpServer
 end
 
 not_found do
-  ''
+  '' # No content.
 end
 
 error do
-  ''
+  '' # No content.
 end
 
 before do
-  headers 'qcp-version' => "#{$version}"
+  headers 'qcp-version' => $version
   content_type :json
 end
 
