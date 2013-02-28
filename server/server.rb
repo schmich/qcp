@@ -19,7 +19,7 @@ class QcpServer
   end
 
   def new_token
-    token = Passgen::generate while (tokens.include?(token) || token.nil?)
+    token = Passgen::generate while (!token || tokens.include?(token))
     tokens << token
     token
   end
