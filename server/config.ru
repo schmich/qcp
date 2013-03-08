@@ -1,3 +1,3 @@
 $LOAD_PATH << '.'
-require './server'
+require './web'
 run QcpApp

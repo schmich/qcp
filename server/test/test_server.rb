@@ -1,4 +1,4 @@
-require 'server'
+require 'web'
 require 'test/unit'
 require 'rack/test'
 require 'json'
