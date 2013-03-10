@@ -53,7 +53,9 @@ class QcpApp < Sinatra::Base
     configured!
     master_password_authenticated!
     status 201
-    { :token => @qcp.new_token }.to_json
+    token = @qcp.new_token
+    headers 'Location' => server_url("/tokens/#{URI.encode(token)}")
+    { :token => token }.to_json
   end
 
   get '/clipboard' do
@@ -91,6 +93,11 @@ private
     if @qcp.master_password.nil?
       halt 400, { :error => 'Server not configured.' }.to_json
     end
+  end
+
+  def server_url(path)
+    @server_url ||= URI.parse("#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}")
+    (@server_url + path).to_s
   end
 
   def master_password_authenticated!

@@ -106,6 +106,12 @@ class QcpInitializedTest < Test::Unit::TestCase
     token = r['token']
     assert_not_nil token
     assert !token.strip.empty?
+    headers = last_response.headers
+    assert_not_nil headers
+    location = headers['Location']
+    assert_not_nil location
+    assert !location.strip.empty?
+    assert location =~ /^http.+\/\/.+\/tokens\/.+$/
   end
 
   def test_token_unique
