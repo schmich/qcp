@@ -4,6 +4,11 @@ require 'json'
 require 'version'
 
 class QcpApp < Sinatra::Base
+  def initialize
+    @qcp = QcpServer.new
+    super
+  end
+
   not_found do
     '' # No content.
   end
@@ -21,46 +26,44 @@ class QcpApp < Sinatra::Base
     { :version => $version }.to_json
   end
 
-  get '/registry' do
-    { :configured => !@qcp.nil? }.to_json
+  get '/master' do
+    { :initialized => !@qcp.master_password.nil? }.to_json
   end
 
-  post '/registry' do
-    if @qcp.nil?
-      master = params[:master]
-      if !master
-        halt 400, { :error => 'Specify master password.' }.to_json
-      end
-
-      if master.strip.empty?
-        halt 400, { :error => 'Master password must not be empty.' }.to_json
-      end
-
-      @qcp = QcpServer.new(master)
-    else
-      master = params[:master]
-      if !master
-        halt 400, { :error => 'Specify master password.' }.to_json
-      end
-
-      if master != @qcp.master
-        halt 403, { :error => 'Incorrect master password.' }.to_json
-      end
+  put '/master' do
+    if !@qcp.master_password.nil?
+      token_authenticated!
     end
 
-    { :token => @qcp.new_token }.to_json
+    password = params[:password]
+    if !password
+      halt 400, { :error => 'Specify master password.' }.to_json
+    end
+
+    if password.strip.empty?
+      halt 400, { :error => 'Master password must not be empty.' }.to_json
+    end
+
+    @qcp.master_password = password
+
+    { :initialized => true }.to_json
+  end
+
+  post '/tokens' do
+    master_password_authenticated!
+    { :token => 'asdf' }.to_json
   end
 
   get '/clipboard' do
     configured!
-    authenticated!
+    token_authenticated!
 
     { :content => @qcp.content }.to_json
   end
 
   post '/clipboard' do
     configured!
-    authenticated!
+    token_authenticated!
 
     content = params[:content]
     if !content
@@ -74,7 +77,7 @@ class QcpApp < Sinatra::Base
 
   delete '/clipboard' do
     configured!
-    authenticated!
+    token_authenticated!
 
     @qcp.content = nil
 
@@ -88,15 +91,27 @@ private
     end
   end
 
-  def authenticated!
+  def master_password_authenticated!
     content_type :json
 
-    @auth ||= Rack::Auth::Basic::Request.new(request.env)
+    auth ||= Rack::Auth::Basic::Request.new(request.env)
 
-    if !@auth.provided? || !@auth.basic? || !@auth.credentials
-      authenticate('Specify credentials.')
-    elsif !@qcp.token? @auth.credentials[0]
-      authenticate('Incorrect credentials.')
+    if !auth.provided? || !auth.basic? || !auth.credentials
+      authenticate('Specify master password.')
+    elsif @qcp.master_password != auth.credentials[0]
+      authenticate('Incorrect master password.')
+    end
+  end
+
+  def token_authenticated!
+    content_type :json
+
+    auth ||= Rack::Auth::Basic::Request.new(request.env)
+
+    if !auth.provided? || !auth.basic? || !auth.credentials
+      authenticate('Specify authentication token.')
+    elsif !@qcp.token? auth.credentials[0]
+      authenticate('Incorrect authentication token.')
     end
   end
 

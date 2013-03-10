@@ -1,13 +1,13 @@
 require 'passgen'
 
 class QcpServer
-  def initialize(master)
-    @master = master
+  def initialize()
+    @master_password = nil
     @content = nil
     @tokens = []
   end
 
-  attr_accessor :master
+  attr_accessor :master_password
   attr_accessor :tokens
   attr_accessor :content
 
