@@ -75,7 +75,13 @@ class QcpSimpleAppTest < Test::Unit::TestCase
     assert_equal true, init
   end
 
-  def test_tokens_auth
+  def test_tokens_no_master
+    post '/tokens'
+    assert_json_error
+  end
+
+  def test_tokens_no_auth
+    put '/master', :password => 'foo'
     post '/tokens'
     assert_auth_error
   end
@@ -94,8 +100,26 @@ class QcpInitializedTest < Test::Unit::TestCase
   end
 
   def test_token_create
-    authorize 'foo', ''
+    authenticate
     post '/tokens'
     r = assert_json_response
+    token = r['token']
+    assert_not_nil token
+    assert !token.strip.empty?
+  end
+
+  def test_token_unique
+    authenticate
+    post '/tokens'
+    r = assert_json_response
+    token1 = r['token']
+    post '/tokens'
+    r = assert_json_response
+    token2 = r['token']
+    assert_not_equal token1, token2
+  end
+
+  def authenticate
+    authorize 'foo', ''
   end
 end

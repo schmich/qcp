@@ -50,8 +50,9 @@ class QcpApp < Sinatra::Base
   end
 
   post '/tokens' do
+    configured!
     master_password_authenticated!
-    { :token => 'asdf' }.to_json
+    { :token => @qcp.new_token }.to_json
   end
 
   get '/clipboard' do
@@ -86,7 +87,7 @@ class QcpApp < Sinatra::Base
 
 private
   def configured!
-    if @qcp.nil?
+    if @qcp.master_password.nil?
       halt 400, { :error => 'Server not configured.' }.to_json
     end
   end
