@@ -102,7 +102,7 @@ class QcpInitializedTest < Test::Unit::TestCase
   def test_token_create
     authenticate
     post '/tokens'
-    r = assert_json_response
+    r = assert_json_response(201)
     token = r['token']
     assert_not_nil token
     assert !token.strip.empty?
@@ -111,10 +111,10 @@ class QcpInitializedTest < Test::Unit::TestCase
   def test_token_unique
     authenticate
     post '/tokens'
-    r = assert_json_response
+    r = assert_json_response(201)
     token1 = r['token']
     post '/tokens'
-    r = assert_json_response
+    r = assert_json_response(201)
     token2 = r['token']
     assert_not_equal token1, token2
   end

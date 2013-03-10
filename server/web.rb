@@ -52,6 +52,7 @@ class QcpApp < Sinatra::Base
   post '/tokens' do
     configured!
     master_password_authenticated!
+    status 201
     { :token => @qcp.new_token }.to_json
   end
 
