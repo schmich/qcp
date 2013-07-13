@@ -23,6 +23,11 @@ class Test::Unit::TestCase
     assert last_response.content_type =~ /application\/json/
     return JSON.parse(last_response.body)
   end
+
+  def assert_no_content
+    assert_equal 204, last_response.status
+    assert_equal '', last_response.body
+  end
 end
 
 class QcpSimpleAppTest < Test::Unit::TestCase
@@ -75,14 +80,25 @@ class QcpSimpleAppTest < Test::Unit::TestCase
     assert_equal true, init
   end
 
-  def test_tokens_no_master
+  def test_token_create_no_master
     post '/tokens'
     assert_json_error
   end
 
-  def test_tokens_no_auth
+  def test_token_create_no_auth
     put '/master', :password => 'foo'
     post '/tokens'
+    assert_auth_error
+  end
+
+  def test_token_delete_no_master
+    delete '/tokens/foo'
+    assert_json_error
+  end
+
+  def test_token_delete_no_auth
+    put '/master', :password => 'foo'
+    delete '/tokens/foo'
     assert_auth_error
   end
 end
@@ -125,7 +141,17 @@ class QcpInitializedTest < Test::Unit::TestCase
     assert_not_equal token1, token2
   end
 
-  def authenticate
-    authorize 'foo', ''
+  def test_token_delete
+    authenticate
+    post '/tokens'
+    r = assert_json_response(201)
+    token = r['token']
+    authenticate(token)
+    delete "/tokens/#{URI.encode(token)}"
+    assert_no_content
+  end
+
+  def authenticate(password = 'foo')
+    authorize password, ''
   end
 end

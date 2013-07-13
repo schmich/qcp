@@ -1,10 +1,11 @@
 require 'passgen'
+require 'set'
 
 class QcpServer
   def initialize()
     @master_password = nil
     @content = nil
-    @tokens = []
+    @tokens = Set.new
   end
 
   attr_accessor :master_password
@@ -19,5 +20,9 @@ class QcpServer
     token = Passgen::generate while (!token || tokens.include?(token))
     tokens << token
     token
+  end
+
+  def revoke_token(token)
+    tokens.delete(token)
   end
 end

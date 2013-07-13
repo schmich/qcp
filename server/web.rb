@@ -32,7 +32,7 @@ class QcpApp < Sinatra::Base
 
   put '/master' do
     if !@qcp.master_password.nil?
-      token_authenticated!
+      authenticated!
     end
 
     password = params[:password]
@@ -52,10 +52,26 @@ class QcpApp < Sinatra::Base
   post '/tokens' do
     configured!
     master_password_authenticated!
+
     status 201
     token = @qcp.new_token
     headers 'Location' => server_url("/tokens/#{URI.encode(token)}")
     { :token => token }.to_json
+  end
+
+  delete '/tokens/:token' do
+    configured!
+    token_authenticated!
+
+    token = params[:token]
+    if !token || token.strip.empty?
+      halt 400, { :error => 'Specify token.' }.to_json
+    end
+
+    # TODO: 400 if token does not exist.
+
+    status 204
+    @qcp.revoke_token(token)
   end
 
   get '/clipboard' do
